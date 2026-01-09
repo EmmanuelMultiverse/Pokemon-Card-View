@@ -7,17 +7,29 @@ import {
   Card,
   CardContent,
   CardMedia,
+  Button,
 } from "@mui/material";
 
 export default function App() {
   const [pokemon, setPokemon] = useState([]);
   const [search, setSearch] = useState("");
+  const [squad, setSquad] = useState([]);
 
   useEffect(() => {
     fetch("https://pokeapi.co/api/v2/pokemon?limit=151")
       .then((res) => res.json())
       .then((data) => setPokemon(data.results));
   }, []);
+
+  const addToSquad = (p) => {
+    if (squad.length < 6 && !squad.find((s) => s.name === p.name)) {
+      setSquad([...squad, p]);
+    }
+  };
+
+  const removeFromSquad = (name) => {
+    setSquad(squad.filter((p) => p.name !== name));
+  };
 
   const filtered = pokemon.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -28,6 +40,8 @@ export default function App() {
       <Typography variant="h5">
         Pokeverse | All Pokémon
       </Typography>
+
+      <Button disabled={squad.length < 2}>Battle</Button>
 
       <TextField
         label="Search"
@@ -41,6 +55,7 @@ export default function App() {
             .split("/")
             .filter(part => part !== "")
             .pop();
+          const inSquad = squad.find((s) => s.name === p.name);
           return (
             <Grid item key={p.name}>
               <Card>
@@ -54,6 +69,11 @@ export default function App() {
                   <Typography align="center">
                     {p.name}
                   </Typography> 
+                  {inSquad ? (
+                    <Button onClick={() => removeFromSquad(p.name)}>Remove</Button>
+                  ) : (
+                    <Button onClick={() => addToSquad(p)}>Add</Button>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
